@@ -4,9 +4,9 @@ public class Application {
 	 */
 	public static void runApp(){
 		while (true){
-			String data = FileIO.waitForTurn();
+			FileIO.MoveData data = FileIO.waitForTurn();
 
-			if (data.equals("end")) {
+			if (data.action == FileIO.MoveData.Action.END) {
 				break;
 			}
 			String result = doTurn(data);
@@ -18,10 +18,10 @@ public class Application {
 	/**
 	 * Turn logic. Make a call to the Algorithm class for most of it
 	 * Remember to add timing logic!
-	 * @param data move_file data, maybe switch to obj to add timing data more easily
+	 * @param data move_file data
 	 * @return string to write to the move_file
 	 */
-	public static String doTurn(String data){
+	public static String doTurn(FileIO.MoveData data){
 		return null;
 	}
 }

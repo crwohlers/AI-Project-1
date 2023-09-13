@@ -3,8 +3,7 @@
  */
 public class Globals {
 
-	//TODO: choose Team Name
-	public static final String teamName = "TBD";
+	public static String teamName = "TBD";
 	public static final String pathToMove = "move_file";
 	public static final String pathToGo = teamName + ".go";
 	public static final String pathToPass = teamName + ".pass";

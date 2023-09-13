@@ -1,0 +1,2 @@
+TeamName
+java -jar fileName.jar --name Team1
