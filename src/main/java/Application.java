@@ -38,16 +38,20 @@ public class Application {
 	 * @return string to write to the move_file
 	 */
 	public static String doTurn(FileIO.MoveData data, boolean first){
-		String move = " ";
-		if (!first){
+		String move = "";
+		System.out.println("act: " + data.action + " move: " + data.move);
+
+		if (!first && !data.move.equals("0,0 0,0")){
+			System.out.println("removing " + data.move);
 			Board.removeConnection(data.move);
 		}
+
 		if (data.action == FileIO.MoveData.Action.PASS){
 			return Globals.teamName + " 0,0 0,0";
 		}
 
 
-		while (!Board.edgeConnections.containsKey(move) || !Board.edgeConnections.get(move)) {
+		while (move.length() == 0 || !Board.edgeConnections.containsKey(Board.parseMoveToEdgeKey(move))) {
 
 
 			int x = (int) (Math.random() * 9);
