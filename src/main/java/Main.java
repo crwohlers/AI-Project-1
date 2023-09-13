@@ -1,3 +1,5 @@
+import Algorithm.Board;
+
 import java.util.Arrays;
 
 public class Main {
@@ -6,12 +8,12 @@ public class Main {
 
 		for (int i = 0; i < args.length; i++){
 			if (i < args.length-1 && args[i].equals("--name")){
-				Globals.teamName = args[i+1];
+				Globals.setTeamName(args[i+1]);
 				i++;
 			}
 		}
-
-		System.out.println(Globals.teamName);
+		Board.edgeConnections.values();     //load board class, results ignored intentionally
+		//System.out.println(Globals.teamName);
 
 		Application.runApp();
 	}

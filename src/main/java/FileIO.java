@@ -19,20 +19,22 @@ public class FileIO {
 	 */
 	public static MoveData waitForTurn(){
 		while (true){
-			if (go.exists()){
-				Scanner in = null;
-				try {
-					in = new Scanner(moveFile);
+			if (go.exists() || pass.exists()){
+
+				MoveData.Action action = go.exists()? MoveData.Action.GO : MoveData.Action.PASS;
+
+				try (Scanner in = new Scanner(moveFile)){
+
+					if (!in.hasNext()){
+						return new MoveData(go.lastModified(), MoveData.Action.FIRST, "");
+					}
+
+					in.next();
+					String data = in.nextLine().trim();
+					return new MoveData(go.lastModified(), action, data);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-
-				String data = in.nextLine();
-				in.close();
-				return new MoveData(go.lastModified(), MoveData.Action.GO, data);
-			}
-			else if (pass.exists()){
-				return new MoveData(pass.lastModified(), MoveData.Action.PASS, Globals.teamName + "0,0 0,0");
 			}
 			else if (end.exists()){
 				return new MoveData(0, MoveData.Action.END, "");
@@ -47,15 +49,28 @@ public class FileIO {
 		}
 	}
 
+	public static void waitForEndOfTurn(long stamp){
+		while (true){
+			if ((go.exists() && go.lastModified() == stamp) || (pass.exists() && pass.lastModified() == stamp)){
+				try {
+					sleep(50);  //can change
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			else{
+				break;
+			}
+		}
+	}
+
 	/**
 	 * Writes a turn result to a file
 	 * @param result data to write
 	 */
 	public static void writeTurnResult(String result){
-		try {
-			FileWriter writer = new FileWriter(moveFile);
+		try (FileWriter writer = new FileWriter(moveFile)){
 			writer.write(result);
-			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -68,17 +83,17 @@ public class FileIO {
 	public static class MoveData {
 		public long moveStartStamp;    //millis since epoch
 		public Action action;
-		public String data;            //read from move_file
+		public String move;            //read from move_file
 
 		public MoveData(long mod, Action toDo, String data){
 			moveStartStamp = mod;
 			action = toDo;
-			this.data = data;
+			this.move = data;
 		}
 
 
 		enum Action {
-			GO, PASS, END
+			GO, PASS, END, FIRST
 		}
 
 	}
