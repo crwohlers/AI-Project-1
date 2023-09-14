@@ -19,7 +19,10 @@ public class FileIO {
 	 */
 	public static MoveData waitForTurn(){
 		while (true){
-			if (go.exists() || pass.exists()){
+			if (end.exists()){
+				return new MoveData(0, MoveData.Action.END, "");
+			}
+			else if (go.exists() || pass.exists()){
 
 				MoveData.Action action = go.exists()? MoveData.Action.GO : MoveData.Action.PASS;
 
@@ -35,9 +38,6 @@ public class FileIO {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-			}
-			else if (end.exists()){
-				return new MoveData(0, MoveData.Action.END, "");
 			}
 			else{
 				try {

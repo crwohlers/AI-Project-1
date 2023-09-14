@@ -1,5 +1,7 @@
 import Algorithm.Board;
 
+import java.util.Collection;
+
 import static java.lang.Thread.sleep;
 
 public class Application {
@@ -50,19 +52,27 @@ public class Application {
 			return Globals.teamName + " 0,0 0,0";
 		}
 
+		Board.evaluateSections();
 
 		while (move.length() == 0 || !Board.edgeConnections.containsKey(Board.parseMoveToEdgeKey(move))) {
 
+			if (Board.sections.size() > 0){
+				Board.Edge line = Board.sections.stream().flatMap(Collection::stream).filter(b->b.conns.size() == 1).findFirst().orElse(Board.sections.get(0).get(0)).conns.get(0);
 
-			int x = (int) (Math.random() * 9);
-			int y = (int) (Math.random() * 9);
+				move = line.c1[0] + "," + line.c1[1] + " " + line.c2[0] + "," + line.c2[1];
+			}
+			else{
+				int x = (int) (Math.random() * 9);
+				int y = (int) (Math.random() * 9);
 
-			int horiz = (int) (Math.random() * 2);
+				int horiz = (int) (Math.random() * 2);
 
-			int x2 = x + (horiz == 1 ? 1 : 0);
-			int y2 = y + (horiz == 0 ? 1 : 0);
-			move = x + "," + y + " " + x2 + "," + y2;
+				int x2 = x + (horiz == 1 ? 1 : 0);
+				int y2 = y + (horiz == 0 ? 1 : 0);
+				move = x + "," + y + " " + x2 + "," + y2;
+			}
 		}
+
 		Board.removeConnection(move);
 		System.out.println(Globals.teamName + " " + move);
 		return Globals.teamName + " " + move;
