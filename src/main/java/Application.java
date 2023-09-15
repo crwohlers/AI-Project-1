@@ -52,8 +52,6 @@ public class Application {
 			return Globals.teamName + " 0,0 0,0";
 		}
 
-		Board.evaluateSections();
-
 		while (move.length() == 0 || !Board.edgeConnections.containsKey(Board.parseMoveToEdgeKey(move))) {
 
 			if (Board.sections.size() > 0){

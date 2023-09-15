@@ -102,7 +102,13 @@ public class Board {
 		}
 
 		edgeConnections.remove(key);
+		rm.weight = -Integer.MAX_VALUE;
+		evaluateSections();
 
+		b1.updWeight();
+		if (rm.b2 != null){
+			rm.b2.updWeight();
+		}
 	}
 
 	public static void evaluateSections() {
@@ -154,6 +160,37 @@ public class Board {
 	public static class Box {
 		public ArrayList<Edge> conns = new ArrayList<>();
 
+		public double getWeight() {
+			return weight;
+		}
+
+		public void updWeight() {
+			switch (conns.size()){
+				case 0:
+					weight = -Integer.MAX_VALUE;
+					break;
+				case 1:
+					weight = Board.sections.stream().filter(s->s.contains(this)).findFirst().get().size();
+					break;
+				case 2:
+					weight = -Board.sections.stream().filter(s->s.contains(this)).findFirst().get().size();
+					break;
+				case 3:
+					weight = .5;
+					break;
+				default:
+					System.out.println("Error: box has weird connections");
+			}
+
+			for (Edge conn:conns) {
+				conn.updEdgeWeight();
+			}
+
+
+		}
+
+		private double weight = 0;
+
 		public Box(){
 		}
 	}
@@ -164,6 +201,18 @@ public class Board {
 		public Box b2;
 		public int [] c1;
 		public int [] c2;
+
+		public double weight = 0;
+
+		public void updEdgeWeight(){
+			if (b2 == null){
+				weight = b1.getWeight() / 2;
+			}
+			else {
+				weight = (b1.getWeight() + b2.getWeight()) / 2;
+			}
+		}
+
 
 		public Edge(Box b, int [] c1, int [] c2){
 			b.conns.add(this);
