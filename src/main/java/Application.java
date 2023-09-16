@@ -40,6 +40,7 @@ public class Application {
 	 * @return string to write to the move_file
 	 */
 	public static String doTurn(FileIO.MoveData data, boolean first){
+		//#region replace with algorithm
 		String move = "";
 		System.out.println("act: " + data.action + " move: " + data.move);
 
@@ -70,7 +71,7 @@ public class Application {
 				move = x + "," + y + " " + x2 + "," + y2;
 			}
 		}
-
+		//#endregion
 		Board.removeConnection(move);
 		System.out.println(Globals.teamName + " " + move);
 		return Globals.teamName + " " + move;

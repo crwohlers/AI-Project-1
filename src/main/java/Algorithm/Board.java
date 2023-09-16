@@ -54,10 +54,18 @@ public class Board {
 				}
 			}
 		}
-		int x = 1; //breakpoint line
+		//int x = 1; //breakpoint line
 	}
 
-
+	/**
+	 * This can probably be avoided with better coding practices.
+	 * Generally, seeks to avoid reversed coords. Also, I wrote the map to label each edge uniquely, so easier to
+	 * translate to there.
+	 * Thus, this also serves as a translation layer from node coordinates (move_file) to box coordinates (internal).
+	 *
+	 * @param move move data in the form provide by move_file and the MoveData object
+	 * @return a key to Board.edgeConnections to retrieve an edge.
+	 */
 	public static String parseMoveToEdgeKey(String move){
 		//move is "x,y x,y"
 		move = move.replace(',', ' ');
@@ -89,6 +97,13 @@ public class Board {
 		}
 	}
 
+
+	/**
+	 * Do a move on the internal representation of the board. As such, remove one connection.
+	 * Then do updates on sections and box weights.
+	 *
+	 * @param move move string in the form given from move_file or the MoveData object.
+	 */
 	public static void removeConnection(String move){
 		String key = parseMoveToEdgeKey(move);
 		Edge rm = edgeConnections.get(key);
@@ -111,6 +126,12 @@ public class Board {
 		}
 	}
 
+	/**
+	 * Backbone of several things. A "section" is a piece that can be captured in a row.
+	 * Generally, these are just a line of boxes that each have 2-3 lines on them already.
+	 *
+	 * Theoretically should be safe against circular pieces, but maybe more testing needed there.
+	 */
 	public static void evaluateSections() {
 		sections.clear();
 		List<Box> used = new ArrayList<>();
@@ -128,21 +149,26 @@ public class Board {
 				else{
 					x++;
 				}
-				continue;
+				continue;   //not interested, check the next box (back to start)
 			}
-			//head should now be new and necessary to keep track of (adding connection will be good or bad)
+			//head should now be new and necessary to keep track of (adding connection will lead to captures)
 			section.add(head);
 			used.add(head);
 
+			//connected boxes
 			ArrayList<Box> searchQueue = head.conns.stream().flatMap(edge -> edge.connections().stream()).collect(Collectors.toCollection(ArrayList::new));
+			//that are not used or do not continue section
 			searchQueue.removeAll(used);
 			searchQueue.removeIf(b->b.conns.size()>2 || b.conns.size() == 0);
+
+			//not sure what search algorithm this is, hopefully depth-first, not sure it matters
 			while (searchQueue.size() > 0){
 				Box check = searchQueue.get(0);
 				used.add(check);
 				section.add(check);
 				searchQueue.remove(check);
 
+				//same restrictions as above, now crammed into one line
 				searchQueue.addAll(0, check.conns.stream().flatMap(edge -> edge.connections().stream())
 											.filter(b->!used.contains(b) && (b.conns.size() == 1 || b.conns.size() ==2)).collect(Collectors.toList()));
 
@@ -164,6 +190,10 @@ public class Board {
 			return weight;
 		}
 
+		/**
+		 * Provides Box weighting. Generally depicts how interested the player should be in that box.
+		 * Higher numbers are more interesting.
+		 */
 		public void updWeight() {
 			switch (conns.size()){
 				case 0:
@@ -195,6 +225,9 @@ public class Board {
 		}
 	}
 
+	/**
+	 * Graph Edge
+	 */
 	public static class Edge {
 
 		public Box b1;
@@ -204,7 +237,11 @@ public class Board {
 
 		public double weight = 0;
 
-		public void updEdgeWeight(){
+		/**
+		 * Provides an edge weighting. Higher numbers are better.
+		 * Done by averaging the adjacent box weights. Off of edge are considered to be zero, changeable if necessary.
+		 */
+		private void updEdgeWeight(){
 			if (b2 == null){
 				weight = b1.getWeight() / 2;
 			}
@@ -213,7 +250,12 @@ public class Board {
 			}
 		}
 
-
+		/**
+		 * Two constructors to allow for edges
+		 * @param b An edge box
+		 * @param c1 coord 1
+		 * @param c2 coord 2
+		 */
 		public Edge(Box b, int [] c1, int [] c2){
 			b.conns.add(this);
 			b1 = b;
@@ -233,6 +275,10 @@ public class Board {
 			this.c2 = c2;
 		}
 
+		/**
+		 * Returns the connections in a way that's easier to use than looking for b1, b2.
+		 * @return An arraylist of the 1-2 connections this has.
+		 */
 		public List<Box> connections(){
 			ArrayList<Box> ret = new ArrayList<>();
 			ret.add(b1);

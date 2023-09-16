@@ -14,8 +14,8 @@ public class FileIO {
 	private static final File moveFile = new File(Globals.pathToMove);
 
 	/**
-	 * Polls the folder for the .go/.pass files, returns move data when found.
-	 * @return move data, probably switch to obj for timing info
+	 * Polls the folder for the .go/.pass/end files, returns move data when found.
+	 * @return move data
 	 */
 	public static MoveData waitForTurn(){
 		while (true){
@@ -49,6 +49,11 @@ public class FileIO {
 		}
 	}
 
+	/**
+	 * The ref polls every 50ms for the move to finish, we have to wait for that. Do so by providing
+	 * the time stamp of the start of the turn and comparing against that.
+	 * @param stamp The unix timestamp of the start of the turn
+	 */
 	public static void waitForEndOfTurn(long stamp){
 		while (true){
 			if ((go.exists() && go.lastModified() == stamp) || (pass.exists() && pass.lastModified() == stamp)){
