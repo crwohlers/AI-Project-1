@@ -9,7 +9,9 @@ public class Globals {
 	public static String pathToPass = teamName + ".pass";
 	public static String pathToEnd = "end_game";
 
-	public static final int time_limit = 10000; //ms seems good
+	public static Board mainBoard = new Board(true);
+
+	public static final int time_limit = 2 * 1000; //ms seems good
 	public static final int pass_time_limit = 2000;
 
 

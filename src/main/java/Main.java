@@ -1,7 +1,3 @@
-import Algorithm.Board;
-
-import java.util.Arrays;
-
 public class Main {
 
 	public static void main(String[] args){
@@ -12,7 +8,7 @@ public class Main {
 				i++;
 			}
 		}
-		Board.edgeConnections.values();     //load board class, results ignored intentionally
+
 		//System.out.println(Globals.teamName);
 
 		Application.runApp();

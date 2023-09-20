@@ -1,5 +1,3 @@
-package Algorithm;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -9,16 +7,24 @@ import java.util.stream.Collectors;
  */
 public class Board {
 
-	public static Box[][] cells = new Box[9][9];
-	public static Map<String, Edge> edgeConnections = new HashMap<>();
-	public static List<List<Box>> sections = new ArrayList<>();
-	static {
-		for (int x = 0; x < 9; x++){
-			for (int y = 0; y < 9; y++){
-				cells[x][y] = new Box();
+	public Box[][] cells = new Box[9][9];
+	public Map<String, Edge> edgeConnections = new HashMap<>();
+	public Set<Edge> removed = new HashSet<>();
+	public List<List<Box>> sections = new ArrayList<>();
+	public Board(boolean generate) {
+		if (generate){
+			for (int x = 0; x < 9; x++){
+				for (int y = 0; y < 9; y++){
+					cells[x][y] = new Box(this);
+				}
 			}
-		}
 
+			this.generateEdges();
+			//int x = 1; //breakpoint line
+		}
+	}
+
+	private void generateEdges(){
 		for (int x= 0; x < 9; x++){
 			for (int y= 0; y < 9; y++){
 				//box based coords: +x is down, +y is right
@@ -54,7 +60,6 @@ public class Board {
 				}
 			}
 		}
-		//int x = 1; //breakpoint line
 	}
 
 	/**
@@ -104,16 +109,24 @@ public class Board {
 	 *
 	 * @param move move string in the form given from move_file or the MoveData object.
 	 */
-	public static void removeConnection(String move){
+	public void removeConnection(String move, int player){
 		String key = parseMoveToEdgeKey(move);
 		Edge rm = edgeConnections.get(key);
+		rm.removedBy = player;
+		removed.add(rm);
 
 		Box b1 = rm.b1;
 
 		b1.conns.remove(rm);
+		if (b1.conns.size() == 0){
+			b1.capturedBy = player;
+		}
 
 		if (rm.b2 != null){
 			rm.b2.conns.remove(rm);
+			if (rm.b2.conns.size() == 0){
+				rm.b2.capturedBy = player;
+			}
 		}
 
 		edgeConnections.remove(key);
@@ -132,23 +145,25 @@ public class Board {
 	 *
 	 * Theoretically should be safe against circular pieces, but maybe more testing needed there.
 	 */
-	public static void evaluateSections() {
+	public void evaluateSections() {
 		sections.clear();
 		List<Box> used = new ArrayList<>();
-		List<Box> section = new ArrayList<>();
 		int x = 0;
 		int y = 0;
 
-		while(x+y < 16){
+		while(y < 9){
+			List<Box> section = new ArrayList<>();
 			Box head = cells[x][y];
+
+			if (x == 8){
+				y++;
+				x = 0;
+			}
+			else{
+				x++;
+			}
+
 			if (used.contains(head) || (head.conns.size() == 0 || head.conns.size() > 2)){
-				if (x == 8){
-					y++;
-					x = 0;
-				}
-				else{
-					x++;
-				}
 				continue;   //not interested, check the next box (back to start)
 			}
 			//head should now be new and necessary to keep track of (adding connection will lead to captures)
@@ -174,16 +189,42 @@ public class Board {
 
 			}
 
-			sections.add(section);
 
+
+			sections.add(section);
+			for (Box part : section){
+				part.updWeight();
+			}
 		}
 
 	}
+
+
+	public Board copy(){
+		Board cp = new Board(false);
+		for (int x= 0; x < 9; x++){
+			for (int y= 0; y < 9; y++){
+				cp.cells[x][y] = cells[x][y].copy(cp);
+			}
+		}
+		cp.generateEdges();
+
+		for (Edge e: removed) {
+			String move = e.c1[0] + "," + e.c1[1] + " " + e.c2[0] + "," + e.c2[1];
+			cp.removeConnection(move, e.removedBy);
+		}
+
+		return cp;
+	}
+
+
 
 	/**
 	 * Graph node.
 	 */
 	public static class Box {
+		public Board belongsTo;
+		public int capturedBy = -1;
 		public ArrayList<Edge> conns = new ArrayList<>();
 
 		public double getWeight() {
@@ -195,15 +236,16 @@ public class Board {
 		 * Higher numbers are more interesting.
 		 */
 		public void updWeight() {
+
 			switch (conns.size()){
 				case 0:
 					weight = -Integer.MAX_VALUE;
 					break;
 				case 1:
-					weight = Board.sections.stream().filter(s->s.contains(this)).findFirst().get().size();
+					weight = belongsTo.sections.stream().filter(s->s.contains(this)).findFirst().get().size();
 					break;
 				case 2:
-					weight = -Board.sections.stream().filter(s->s.contains(this)).findFirst().get().size();
+					weight = -belongsTo.sections.stream().filter(s->s.contains(this)).findFirst().get().size();
 					break;
 				case 3:
 					weight = .5;
@@ -221,7 +263,15 @@ public class Board {
 
 		private double weight = 0;
 
-		public Box(){
+		public Box(Board belongsTo){
+			this.belongsTo = belongsTo;
+		}
+
+		public Box copy(Board owner){
+			Box cp = new Box(owner);
+			cp.weight = getWeight();
+			cp.capturedBy = capturedBy;
+			return cp;
 		}
 	}
 
@@ -234,6 +284,8 @@ public class Board {
 		public Box b2;
 		public int [] c1;
 		public int [] c2;
+
+		public int removedBy = -1;
 
 		public double weight = 0;
 
