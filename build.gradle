@@ -7,7 +7,7 @@ plugins {
 mainClassName = "Main"
 
 group 'org.example'
-version '1.0-SNAPSHOT'
+version ''
 
 repositories {
     mavenCentral()

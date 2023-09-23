@@ -73,16 +73,11 @@ public class Board {
 	 */
 	public static String parseMoveToEdgeKey(String move){
 		//move is "x,y x,y"
-		move = move.replace(',', ' ');
 
-		Scanner in = new Scanner(move);
-
-		int x1 = in.nextInt();
-		int y1 = in.nextInt();
-		int x2 = in.nextInt();
-		int y2 = in.nextInt();
-
-		in.close();
+		int x1 = Integer.parseInt(move.substring(0,1));
+		int y1 = Integer.parseInt(move.substring(2,3));
+		int x2 = Integer.parseInt(move.substring(4,5));
+		int y2 = Integer.parseInt(move.substring(6));
 
 		if (x2 < x1){   //swap, leverage the fact that moves must be 1 long
 			x2++;

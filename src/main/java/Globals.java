@@ -11,7 +11,7 @@ public class Globals {
 
 	public static Board mainBoard = new Board(true);
 
-	public static final int time_limit = 2 * 1000; //ms seems good
+	public static final int time_limit = 10 * 1000; //ms seems good
 	public static final int pass_time_limit = 2000;
 
 

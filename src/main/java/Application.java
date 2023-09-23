@@ -40,7 +40,7 @@ public class Application {
 	 */
 	public static String doTurn(FileIO.MoveData data, boolean first){
 		if (!first && !data.move.equals("0,0 0,0")){
-			System.out.println("removing " + data.move);
+			//System.out.println("removing " + data.move);
 			Globals.mainBoard.removeConnection(data.move, 0);
 		}
 
@@ -51,9 +51,9 @@ public class Application {
 		String move;
 		while (true) {
 			Board.Edge line = Algorithm.minimaxFindBest(data.moveStartStamp);
-			System.out.println(line.weight);
+			//System.out.println(line.weight);
 			move = line.c1[0] + "," + line.c1[1] + " " + line.c2[0] + "," + line.c2[1];
-			System.out.println(Globals.teamName + " " + move);
+			//System.out.println(Globals.teamName + " " + move);
 
 			if (!Globals.mainBoard.edgeConnections.containsKey(Board.parseMoveToEdgeKey(move))) {
 				continue;
